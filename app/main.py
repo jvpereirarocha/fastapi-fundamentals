@@ -268,3 +268,31 @@ async def update_item_optional_body(
 async def update_item_multiple_body(item_id: int, item: Item, user: User):
     results = {'item_id': item_id, 'item': item, 'user': user}
     return results
+
+
+@app.put('/items/update_body_extra_field/{item_id}')
+async def update_item_singular_extra_value(
+    item_id: int, item: Item, user: User, importance: int = Body(...)
+):
+    results = {'item_id': item_id, 'item': item, 'user': user, 'importance': importance}
+    return results
+
+
+@app.put('/items/update_multiple_body_query/{item_id}')
+async def update_multiple_body_query(
+    item_id: int,
+    item: Item,
+    user: User,
+    importance: int = Body(..., gt=0),
+    q: Optional[str] = None
+):
+    results = {'item_id': item_id, 'item': item, 'user': user, 'importance': importance}
+    if q:
+        results.update({'q': q})
+    return results
+
+
+@app.put('/items/update_item_embed_body/{item_id}')
+async def update_item_embed_body(item_id: int, item: Item = Body(..., embed=True)):
+    results = {'item_id': item_id, 'item': item}
+    return results
