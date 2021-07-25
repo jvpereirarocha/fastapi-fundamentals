@@ -1,7 +1,7 @@
 from typing import Optional, List
 from fastapi import FastAPI, Query, Path
 from app.utils import ModelName, fake_items_db, items_dict
-from app.schemas import Item
+from app.schemas import Item, User
 
 app = FastAPI()
 
@@ -246,4 +246,25 @@ async def number_validator_float_greather_than_less_than_item(
     results = {'item_id': item_id}
     if q:
         results.update({'q': q})
+    return results
+
+
+@app.put('/items/update_optional_item/{item_id}')
+async def update_item_optional_body(
+    *,
+    item_id: int = Path(..., title='The ID of the item to get', ge=0, le=100),
+    q: Optional[str] = None,
+    item: Optional[Item] = None
+):
+    results = {'item_id': item_id}
+    if q:
+        results.update({'q': q})
+    if item:
+        results.update({'item': item})
+    return results
+
+
+@app.put('/items/update_multiple_body/{item_id}')
+async def update_item_multiple_body(item_id: int, item: Item, user: User):
+    results = {'item_id': item_id, 'item': item, 'user': user}
     return results
