@@ -1,5 +1,5 @@
 from typing import Optional, List
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Path
 from app.utils import ModelName, fake_items_db, items_dict
 from app.schemas import Item
 
@@ -196,6 +196,17 @@ async def metadata_description_items(
 @app.get('/items_alias_query_param')
 async def alias_query_param_item(q: Optional[str] = Query(None, alias='item-query')):
     results = items_dict
+    if q:
+        results.update({'q': q})
+    return results
+
+
+@app.get('/items/path_params/{item_id}')
+async def read_path_params_item(
+    item_id: int = Path(..., title='The ID of the item to get'),
+    q: Optional[str] = Query(None, alias='item-query'),
+):
+    results = {'item_id': item_id}
     if q:
         results.update({'q': q})
     return results
