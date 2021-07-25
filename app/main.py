@@ -191,3 +191,11 @@ async def metadata_description_items(
     if q:
         results.update({'q': q})
     return results
+
+
+@app.get('/items_alias_query_param')
+async def alias_query_param_item(q: Optional[str] = Query(None, alias='item-query')):
+    results = items_dict
+    if q:
+        results.update({'q': q})
+    return results
