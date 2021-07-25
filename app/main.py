@@ -210,3 +210,40 @@ async def read_path_params_item(
     if q:
         results.update({'q': q})
     return results
+
+
+@app.get('/items/number_validator_ge/{item_id}')
+async def number_validator_greather_equals_item(
+    *,
+    item_id: int = Path(..., title='The ID of the item to get', ge=1),
+    q: Optional[str]
+):
+    results = {'item_id': item_id}
+    if q:
+        results.update({'q': q})
+    return results
+
+
+@app.get('/items/number_validator_gt_le/{item_id}')
+async def number_validator_greather_than_less_equals_item(
+    *,
+    item_id: int = Path(..., title='The ID of the item to get', gt=0, le=100),
+    q: Optional[str]
+):
+    results = {'item_id': item_id}
+    if q:
+        results.update({'q': q})
+    return results
+
+
+@app.get('/items/number_validator_float_gt_lt/{item_id}')
+async def number_validator_float_greather_than_less_than_item(
+    *,
+    item_id: int = Path(..., title='The ID of the item to get', ge=0, le=100),
+    q: Optional[str],
+    size: float = Query(..., gt=0, lt=10.5)
+):
+    results = {'item_id': item_id}
+    if q:
+        results.update({'q': q})
+    return results
