@@ -1,7 +1,7 @@
 from typing import Optional, List
 from fastapi import FastAPI, Query, Path, Body
 from app.utils import ModelName, fake_items_db, items_dict
-from app.schemas import Item, User
+from app.schemas import Item, User, DeclaredItem
 
 app = FastAPI()
 
@@ -295,4 +295,10 @@ async def update_multiple_body_query(
 @app.put('/items/update_item_embed_body/{item_id}')
 async def update_item_embed_body(item_id: int, item: Item = Body(..., embed=True)):
     results = {'item_id': item_id, 'item': item}
+    return results
+
+
+@app.put('/items/update_declared_item/{item_id}')
+async def update_declared_item(item_id: int, item: DeclaredItem = Body(..., embed=True)):
+    results = {'item': item}
     return results
