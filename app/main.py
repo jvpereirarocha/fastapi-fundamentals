@@ -1,5 +1,5 @@
 from typing import Optional, List
-from fastapi import FastAPI, Query, Path
+from fastapi import FastAPI, Query, Path, Body
 from app.utils import ModelName, fake_items_db, items_dict
 from app.schemas import Item, User
 
