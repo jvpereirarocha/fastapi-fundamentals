@@ -1,7 +1,10 @@
-from typing import Optional, List
-from fastapi import FastAPI, Query, Path, Body
+from typing import Optional, List, Dict
+from fastapi import FastAPI, Query, Path, Body, Cookie, Header
 from app.utils import ModelName, fake_items_db, items_dict
-from app.schemas import Item, User, DeclaredItem
+from app.schemas import (Item, User, DeclaredItem, Address, Product, UserIn,
+    UserOut, GetUser, ProgrammingLanguage)
+from datetime import datetime, time, timedelta
+from uuid import UUID
 
 app = FastAPI()
 
@@ -145,6 +148,9 @@ async def get_items_regex(
 
 @app.get('/get_items_default_value')
 async def get_items_default_value(q: str = Query("fixedquery", min_length=3, max_length=50)):
+    """
+        Getting default values for query params
+    """
     result = items_dict
     if q:
         results.update({'q': q})
@@ -153,6 +159,9 @@ async def get_items_default_value(q: str = Query("fixedquery", min_length=3, max
 
 @app.get('/many_items_query')
 async def many_items_query(q: Optional[List[str]] = Query(None)):
+    """
+        Many query params
+    """
     results = items_dict
     if q:
         results.update({'q': q})
@@ -161,6 +170,9 @@ async def many_items_query(q: Optional[List[str]] = Query(None)):
 
 @app.get('/many_items_query_default')
 async def many_items_query(q: List[str] = Query(['aaa', 'bbb'])):
+    """
+        Many default query params
+    """
     results = items_dict
     if q:
         results.update({'q': q})
@@ -171,6 +183,9 @@ async def many_items_query(q: List[str] = Query(['aaa', 'bbb'])):
 async def metadata_title_items(
     q: Optional[str] = Query(None, title='Query String', min_length=3)
 ):
+    """
+        Validating query param size
+    """
     results = items_dict
     if q:
         results.update({'q': q})
@@ -187,6 +202,9 @@ async def metadata_description_items(
         max_length=50
     )
 ):
+    """
+        Inserting metadata to query param
+    """
     results = items_dict
     if q:
         results.update({'q': q})
@@ -195,6 +213,9 @@ async def metadata_description_items(
 
 @app.get('/items_alias_query_param')
 async def alias_query_param_item(q: Optional[str] = Query(None, alias='item-query')):
+    """
+        Defining an alias to query param
+    """
     results = items_dict
     if q:
         results.update({'q': q})
@@ -206,6 +227,9 @@ async def read_path_params_item(
     item_id: int = Path(..., title='The ID of the item to get'),
     q: Optional[str] = Query(None, alias='item-query'),
 ):
+    """
+        Inserting path params metadata
+    """
     results = {'item_id': item_id}
     if q:
         results.update({'q': q})
@@ -218,6 +242,9 @@ async def number_validator_greather_equals_item(
     item_id: int = Path(..., title='The ID of the item to get', ge=1),
     q: Optional[str]
 ):
+    """
+        Inserting number validator
+    """
     results = {'item_id': item_id}
     if q:
         results.update({'q': q})
@@ -230,6 +257,9 @@ async def number_validator_greather_than_less_equals_item(
     item_id: int = Path(..., title='The ID of the item to get', gt=0, le=100),
     q: Optional[str]
 ):
+    """
+        Inserting number validator
+    """
     results = {'item_id': item_id}
     if q:
         results.update({'q': q})
@@ -243,6 +273,11 @@ async def number_validator_float_greather_than_less_than_item(
     q: Optional[str],
     size: float = Query(..., gt=0, lt=10.5)
 ):
+    """
+        Using validator to item_id (greather than equals 0 and less equals 100)
+        and size greather than 0 and less than 10.5
+    """
+
     results = {'item_id': item_id}
     if q:
         results.update({'q': q})
@@ -256,6 +291,10 @@ async def update_item_optional_body(
     q: Optional[str] = None,
     item: Optional[Item] = None
 ):
+    """
+        Using validator to item_id (greather than equals 0 and less equals 100)
+    """
+
     results = {'item_id': item_id}
     if q:
         results.update({'q': q})
@@ -266,6 +305,8 @@ async def update_item_optional_body(
 
 @app.put('/items/update_multiple_body/{item_id}')
 async def update_item_multiple_body(item_id: int, item: Item, user: User):
+    """ Using more than one body item (User and Item) """
+
     results = {'item_id': item_id, 'item': item, 'user': user}
     return results
 
@@ -274,6 +315,8 @@ async def update_item_multiple_body(item_id: int, item: Item, user: User):
 async def update_item_singular_extra_value(
     item_id: int, item: Item, user: User, importance: int = Body(...)
 ):
+    """ Updating user with extra value """
+
     results = {'item_id': item_id, 'item': item, 'user': user, 'importance': importance}
     return results
 
@@ -286,6 +329,11 @@ async def update_multiple_body_query(
     importance: int = Body(..., gt=0),
     q: Optional[str] = None
 ):
+    """
+        Using more than one body item (User and Item) and
+        checking if importance is greather than 0
+    """
+
     results = {'item_id': item_id, 'item': item, 'user': user, 'importance': importance}
     if q:
         results.update({'q': q})
@@ -294,11 +342,212 @@ async def update_multiple_body_query(
 
 @app.put('/items/update_item_embed_body/{item_id}')
 async def update_item_embed_body(item_id: int, item: Item = Body(..., embed=True)):
+    """ Embeding nested body """
+
     results = {'item_id': item_id, 'item': item}
     return results
 
 
 @app.put('/items/update_declared_item/{item_id}')
 async def update_declared_item(item_id: int, item: DeclaredItem = Body(..., embed=True)):
+    """ Embeding nested body with declared item """
+
     results = {'item': item}
     return results
+
+
+@app.get('/adresses/', status_code=200)
+async def get_all_adresses():
+    """ Getting All Adresses """
+
+    return {'adresses': 'All'}
+
+
+@app.put('/adresses/{address_id}', status_code=200)
+async def update_address(address_id: int, address: Address):
+    """ Updating Address """
+
+    return {'adresses': address}
+
+
+@app.post('/adresses/states', status_code=201)
+async def create_state(state: Dict[str, str]):
+    """ Using dictionary to create state object """
+
+    return {'states': state}
+
+
+@app.put('/users/schema_extra/{user_id}', status_code=200)
+async def update_user(user_id: int, user: User):
+    """ Updating user with schema_extra example """
+
+    results = {'user_id': user_id, 'user': user}
+    return results
+
+
+@app.put('/users/product_body/{product_id}', status_code=200)
+async def update_product_body(
+    *,
+    product_id: int,
+    product: Product = Body(
+        ...,
+        examples={
+            "normal": {
+                "summary": "Valid",
+                "description": "Valid Example of Product Example",
+                "value": {
+                    "code": "BR52123",
+                    "price": 5.40,
+                    "quantity": 2
+                },
+            },
+            "invalid": {
+                "summary": "Invalid",
+                "description": "Invalid Example of Product. Don't send like that",
+                "value": {
+                    "code": 2123,
+                    "price": "5.40",
+                    "quantity": 2.7
+                },
+            },
+        },
+    ),
+):
+    """ Setting valid and invalid format body examples """
+
+    results = {'product_id': product_id, 'product': product}
+    return results
+
+
+@app.put('/products/using_other_data_types/{product_id}', status_code=200)
+async def update_product_data_types(
+    product_id: UUID,
+    start_datetime: Optional[datetime] = Body(None),
+    end_datetime: Optional[datetime] = Body(None),
+    repeat_at: Optional[time] = Body(None),
+    proccess_after: Optional[timedelta] = Body(None),
+):
+    """ Update product with different data types """
+
+    start_proccess = start_datetime + proccess_after
+    duration = end_datetime - start_proccess
+    return {
+        'product_id': product_id,
+        'start_datetime': start_datetime,
+        'end_datetime': end_datetime,
+        'repeat_at': repeat_at,
+        'proccess_after': proccess_after,
+        'start_proccess': start_proccess,
+        'duration': duration,
+    }
+
+
+@app.get('/products/', status_code=200)
+async def get_products(
+    ads_id: Optional[str] = Cookie(None),
+    user_agent: Optional[str] = Header(None)
+):
+    """ Getting Cookie and Header """
+
+    return {'ads_id': ads_id, 'User-Agent': user_agent}
+
+
+@app.get('/products/disable_conversion', status_code=200)
+async def get_products_disable_conversion(
+    strange_header: Optional[str] = Header(None, convert_underscores=False)
+):
+    """
+        Disable automatically conversion of _ to -
+    """
+    return {'strange_header': strange_header}
+
+
+@app.get('/products/duplicate_header', status_code=200)
+async def get_products_duplicate_header(
+    x_token: Optional[List[str]] = Header(None)
+):
+    """
+        Duplicate Header
+    """
+    return {'X-Token values': x_token}
+
+
+# Don't do this in production! The user password will be showed
+@app.post('/userin/', response_model=UserIn, status_code=201)
+async def create_userin(user: UserIn):
+    """
+        Using Response Model to show response like schema UserIn
+    """
+    return user
+
+
+@app.post('/userout/', response_model=UserOut, status_code=201)
+async def create_userin_show_userout(user: UserIn):
+    """
+        Using Response Model to show response like schema UserOut
+    """
+    return user
+
+
+@app.get('/getusers_schema/', response_model=List[GetUser], status_code=200)
+async def get_users_schema():
+    """
+        Using Response Model to show a list of Users response like schema GetUser
+    """
+    users = [
+        {'email': 'teste@mail.com', 'username': 'test', 'full_name': 'test'},
+        {'email': 'foo@mail.com', 'username': 'foo', 'full_name': 'foo'},
+        {'email': 'bar@mail.com', 'username': 'bar', 'full_name': 'bar'},
+    ]
+    return users
+
+
+@app.get('/languages/all', response_model=List[ProgrammingLanguage], status_code=200)
+async def get_all_programming_languages():
+    """
+        Showing All Programming Languages (including default)
+    """
+    languages = [
+        {"name": 'Python', 'category': 'Back-End'}
+    ]
+    return languages
+
+
+@app.get('/languages/some', response_model=List[ProgrammingLanguage], response_model_exclude_unset=True)
+async def get_some_languages():
+    """
+        Showing some programming languages (default languages not showed)
+    """
+    languages = [
+        {"name": 'Python', 'category': 'Back-End'},
+        {"name": 'CSS', 'category': 'Front-End'},
+    ]
+    return languages
+
+
+@app.get(
+    '/languages/include',
+    response_model=ProgrammingLanguage,
+    response_model_exclude_unset=True,
+    response_model_include={'name'}
+)
+async def include_fields_schema():
+    """
+        Setting required fields to send when make a request
+    """
+
+    return {'name': 'Python', 'category': 'Back-End'}
+
+
+@app.get(
+    '/languages/exclude',
+    response_model=ProgrammingLanguage,
+    response_model_exclude={'name'}
+)
+async def include_fields_schema():
+    """
+        Excluding non-required fields when make a request
+        PS: Default languages defined at the schema won't hide the field 'name'
+    """
+
+    return {'name': 'Javascript', 'category': 'Front-End'}
